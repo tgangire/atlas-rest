@@ -16,8 +16,12 @@ import org.springframework.web.bind.annotation.*
 interface AtlasFeignClient {
 
     /** Entity Rest Started **/
+
+    @PostMapping("/v2/entity")
+    fun createEntity(atlasEntityWithExtInfo: AtlasEntity.AtlasEntityWithExtInfo): Any
+
     @PostMapping("/v2/entity/bulk")
-    fun createEntities(@RequestBody atlasEntitiesWithExtInfo: AtlasEntity.AtlasEntitiesWithExtInfo): Any
+    fun createEntities(@RequestBody atlasEntitiesWithExtInfo: AtlasEntity.AtlasEntityWithExtInfo): Any
 
     @PostMapping("/v2/entity/bulk/classification")
     fun createClassification(@RequestBody classificationAssociateRequest: ClassificationAssociateRequest): Any

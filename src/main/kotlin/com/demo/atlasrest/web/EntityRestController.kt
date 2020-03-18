@@ -2,7 +2,6 @@ package com.demo.atlasrest.web
 
 import com.demo.atlasrest.service.EntityRestService
 import io.swagger.v3.oas.annotations.tags.Tag
-import org.apache.atlas.AtlasClientV2
 import org.apache.atlas.model.instance.AtlasEntity
 import org.apache.atlas.model.instance.AtlasEntityHeaders
 import org.apache.atlas.model.instance.ClassificationAssociateRequest
@@ -17,22 +16,27 @@ class EntityRestController : IBaseController{
     @Autowired
     lateinit var entityRestService: EntityRestService
 
-    @PostMapping("/entity/bulk",produces = [MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"])
-    fun createEntity() : Any{
-        return entityRestService.createEntity()
+    @PostMapping("/entity/bulk", produces = [MediaType.APPLICATION_JSON_VALUE + ";charset=UTF-8"], consumes = [MediaType.APPLICATION_JSON_VALUE + ";charset=UTF-8"])
+    fun createEntities(@RequestBody atlasEntityWithExtInfo: AtlasEntity.AtlasEntityWithExtInfo): Any {
+        return entityRestService.createEntities(atlasEntityWithExtInfo)
     }
 
-    @PostMapping("/entity/bulk/classification",consumes = [MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"],produces = [MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"])
-    fun createClassification(@RequestBody classificationAssociateRequest: ClassificationAssociateRequest) : Any{
+    @PostMapping("/entity", produces = [MediaType.APPLICATION_JSON_VALUE + ";charset=UTF-8"], consumes = [MediaType.APPLICATION_JSON_VALUE + ";charset=UTF-8"])
+    fun createEntity(@RequestBody atlasEntityWithExtInfo: AtlasEntity.AtlasEntityWithExtInfo): Any {
+        return entityRestService.createEntity(atlasEntityWithExtInfo)
+    }
+
+    @PostMapping("/entity/bulk/classification", consumes = [MediaType.APPLICATION_JSON_VALUE + ";charset=UTF-8"], produces = [MediaType.APPLICATION_JSON_VALUE + ";charset=UTF-8"])
+    fun createClassification(@RequestBody classificationAssociateRequest: ClassificationAssociateRequest): Any {
         return entityRestService.createClassification(classificationAssociateRequest)
     }
 
-    @PostMapping("/entity/bulk/setClassification",consumes = [MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"],produces = [MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"])
-    fun setClassification(@RequestBody atlasEntityHeaders: AtlasEntityHeaders) : Any{
+    @PostMapping("/entity/bulk/setClassification", consumes = [MediaType.APPLICATION_JSON_VALUE + ";charset=UTF-8"], produces = [MediaType.APPLICATION_JSON_VALUE + ";charset=UTF-8"])
+    fun setClassification(@RequestBody atlasEntityHeaders: AtlasEntityHeaders): Any {
         return entityRestService.setClassification(atlasEntityHeaders)
     }
 
-    @PostMapping("/entity/guid/{guid}",produces = [MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"])
+    @GetMapping("/entity/guid/{guid}", produces = [MediaType.APPLICATION_JSON_VALUE + ";charset=UTF-8"])
     fun getEntity(@PathVariable guid: String) : AtlasEntity.AtlasEntityWithExtInfo {
         return entityRestService.getEntity(guid)
     }

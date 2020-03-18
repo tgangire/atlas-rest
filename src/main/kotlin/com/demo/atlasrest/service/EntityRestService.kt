@@ -1,9 +1,7 @@
 package com.demo.atlasrest.service
 
 import com.demo.atlasrest.client.AtlasFeignClient
-import org.apache.atlas.AtlasClientV2
 import org.apache.atlas.model.instance.AtlasEntity
-import org.apache.atlas.model.instance.AtlasEntity.AtlasEntitiesWithExtInfo
 import org.apache.atlas.model.instance.AtlasEntityHeaders
 import org.apache.atlas.model.instance.ClassificationAssociateRequest
 import org.springframework.beans.factory.annotation.Autowired
@@ -18,8 +16,8 @@ class EntityRestService {
     @Autowired
     lateinit var atlasFeignClient: AtlasFeignClient
 
-    fun createEntity(): Any {
-        return atlasFeignClient.createEntities(AtlasEntitiesWithExtInfo())
+    fun createEntity(atlasEntityWithExtInfo: AtlasEntity.AtlasEntityWithExtInfo): Any {
+        return atlasFeignClient.createEntity(atlasEntityWithExtInfo)
     }
 
     fun createClassification(classificationAssociateRequest: ClassificationAssociateRequest): Any {
@@ -32,6 +30,10 @@ class EntityRestService {
 
     fun getEntity(guid: String): AtlasEntity.AtlasEntityWithExtInfo {
         return atlasFeignClient.getEntity(guid)
+    }
+
+    fun createEntities(atlasEntityWithExtInfo: AtlasEntity.AtlasEntityWithExtInfo): Any {
+        return atlasFeignClient.createEntities(atlasEntityWithExtInfo)
     }
 
 }
