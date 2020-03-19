@@ -21,7 +21,7 @@ interface AtlasFeignClient {
     fun createEntity(atlasEntityWithExtInfo: AtlasEntity.AtlasEntityWithExtInfo): Any
 
     @PostMapping("/v2/entity/bulk")
-    fun createEntities(@RequestBody atlasEntitiesWithExtInfo: AtlasEntity.AtlasEntityWithExtInfo): Any
+    fun createEntities(@RequestBody atlasEntitiesWithExtInfo: AtlasEntity.AtlasEntitiesWithExtInfo): Any
 
     @PostMapping("/v2/entity/bulk/classification")
     fun createClassification(@RequestBody classificationAssociateRequest: ClassificationAssociateRequest): Any

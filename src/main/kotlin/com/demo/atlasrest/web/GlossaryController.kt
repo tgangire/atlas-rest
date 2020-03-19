@@ -2,36 +2,39 @@ package com.demo.atlasrest.web
 
 import com.demo.atlasrest.service.GlossaryService
 import io.swagger.v3.oas.annotations.tags.Tag
-import org.apache.atlas.AtlasClientV2
 import org.apache.atlas.model.glossary.AtlasGlossary
 import org.apache.atlas.model.glossary.AtlasGlossaryCategory
 import org.apache.atlas.model.glossary.AtlasGlossaryTerm
-import org.apache.atlas.model.instance.AtlasEntity
-import org.apache.atlas.model.instance.AtlasEntity.AtlasEntityWithExtInfo;
 import org.apache.atlas.model.instance.AtlasRelatedObjectId
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.multipart.MultipartFile
 
 @RestController
 @Tag(name="GlossaryREST", description = "REST for Glossary.")
-class GlossaryController :IBaseController{
+class GlossaryController :IBaseController {
 
     @Autowired
-    lateinit var  glossaryService : GlossaryService
+    lateinit var glossaryService: GlossaryService
 
-    @PostMapping("/glossary",consumes = [MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"],produces = [MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"])
-    fun createGlossaries(@RequestBody atlasGlossary: AtlasGlossary) : AtlasGlossary{
+    @PostMapping("/glossary", consumes = [MediaType.APPLICATION_JSON_VALUE + ";charset=UTF-8"], produces = [MediaType.APPLICATION_JSON_VALUE + ";charset=UTF-8"])
+    fun createGlossaries(@RequestBody atlasGlossary: AtlasGlossary): AtlasGlossary {
         return glossaryService.createGlossaries(atlasGlossary)
     }
 
-    @PostMapping("/glossary/categories",consumes = [MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"],produces = [MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"])
-    fun createGlossaryCategory(@RequestBody atlasGlossaryCategoryList:List<AtlasGlossaryCategory>) : List<AtlasGlossaryCategory>{
+    @PostMapping("/glossary/upload")
+    fun uploadGlossaries(@RequestParam("file") file: MultipartFile): String {
+        return glossaryService.uploadGlossaries(file)
+    }
+
+    @PostMapping("/glossary/categories", consumes = [MediaType.APPLICATION_JSON_VALUE + ";charset=UTF-8"], produces = [MediaType.APPLICATION_JSON_VALUE + ";charset=UTF-8"])
+    fun createGlossaryCategory(@RequestBody atlasGlossaryCategoryList: List<AtlasGlossaryCategory>): List<AtlasGlossaryCategory> {
         return glossaryService.createGlossaryCategory(atlasGlossaryCategoryList)
     }
 
-    @PostMapping("/glossary/terms",consumes = [MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"],produces = [MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"])
-    fun createGlossaryTerms(@RequestBody atlasGlossaryTermList:List<AtlasGlossaryTerm>) : List<AtlasGlossaryTerm>{
+    @PostMapping("/glossary/terms", consumes = [MediaType.APPLICATION_JSON_VALUE + ";charset=UTF-8"], produces = [MediaType.APPLICATION_JSON_VALUE + ";charset=UTF-8"])
+    fun createGlossaryTerms(@RequestBody atlasGlossaryTermList: List<AtlasGlossaryTerm>): List<AtlasGlossaryTerm> {
         return glossaryService.createGlossaryTerms(atlasGlossaryTermList)
     }
 
