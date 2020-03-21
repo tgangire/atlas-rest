@@ -7,4 +7,5 @@ class GlossaryModel {
     var terms: String = ""
     var descrition: String = ""
     var long_descrition: String = ""
+    var classification: String = ""
 }

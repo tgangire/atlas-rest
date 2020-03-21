@@ -122,6 +122,8 @@ class EntityRestService {
             val referencedAttributes1 = mutableMapOf<String, Any>()
             referencedAttributes1.put("owner", "hive")
             referencedAttributes1.put("name", currentRow.getCell(0).stringCellValue)
+            referencedAttributes1.put("comment", currentRow.getCell(2).stringCellValue)
+            referencedAttributes1.put("description", currentRow.getCell(1).stringCellValue)
             referencedAttributes1.put("qualifiedName", "default." + tableName + "." + currentRow.getCell(0).stringCellValue + "@hdp_cluster")
             referencedAttributes1.put("type", currentRow.getCell(3).stringCellValue)
             val ra1 = createMap("hive_table").toMutableMap()
@@ -144,7 +146,7 @@ class EntityRestService {
 
         println("table $tableName created")
 
-        return tableName + "Created Successfully"
+        return tableName + " Created Successfully"
     }
 
     fun createMap(typeName: String): Map<String, String> {

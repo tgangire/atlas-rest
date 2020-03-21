@@ -7,6 +7,7 @@ import org.apache.atlas.model.glossary.AtlasGlossaryCategory
 import org.apache.atlas.model.glossary.AtlasGlossaryTerm
 import org.apache.atlas.model.glossary.relations.AtlasGlossaryHeader
 import org.apache.atlas.model.glossary.relations.AtlasTermCategorizationHeader
+import org.apache.atlas.model.instance.AtlasClassification
 import org.apache.atlas.model.instance.AtlasRelatedObjectId
 import org.apache.commons.lang3.StringUtils
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
@@ -24,7 +25,10 @@ class GlossaryService {
     @Autowired
     lateinit var atlasFeignClient: AtlasFeignClient
 
-    fun createGlossaries(atlasGlossary: AtlasGlossary) :AtlasGlossary{
+    @Autowired
+    lateinit var typesRestService: TypesRestService
+
+    fun createGlossaries(atlasGlossary: AtlasGlossary): AtlasGlossary {
         logger.info("In Get Glossaries")
 
         return atlasFeignClient.createGlossaries(atlasGlossary)
@@ -82,6 +86,12 @@ class GlossaryService {
                 glossaryMgodel.terms = currentRow.getCell(2).stringCellValue.trim().replace(".", " ")
                 glossaryMgodel.descrition = currentRow.getCell(3).stringCellValue.trim()
                 glossaryMgodel.long_descrition = currentRow.getCell(4).stringCellValue.trim()
+
+                if (Objects.isNull(currentRow.getCell(9))) {
+                    glossaryMgodel.classification = ""
+                } else {
+                    glossaryMgodel.classification = currentRow.getCell(9).stringCellValue.trim()
+                }
 
                 list.add(glossaryMgodel)
             } else {
@@ -144,6 +154,8 @@ class GlossaryService {
             val atlasGlossaryTermList = mutableListOf<AtlasGlossaryTerm>()
 
             value.forEach { glossaryModel ->
+
+                //create Glossary Term
                 val atlasGlossaryTerm = AtlasGlossaryTerm()
 
                 atlasGlossaryTerm.name = glossaryModel.terms
@@ -155,6 +167,19 @@ class GlossaryService {
                 atlasGlossaryHeader.glossaryGuid = glossaryGuid
 
                 atlasGlossaryTerm.anchor = atlasGlossaryHeader
+
+                var classifications = mutableListOf<AtlasClassification>()
+
+                //add classification if value found
+                if (StringUtils.isNotBlank(glossaryModel.classification)) {
+                    val classification = AtlasClassification()
+
+                    classification.typeName = glossaryModel.classification
+
+                    classifications.add(classification)
+                }
+
+                atlasGlossaryTerm.classifications = classifications
 
                 val cat = mutableSetOf<AtlasTermCategorizationHeader>()
                 val header = AtlasTermCategorizationHeader()
@@ -168,9 +193,9 @@ class GlossaryService {
             }
 
             createGlossaryTerms(atlasGlossaryTermList)
-            logger.info("Terms added")
+            logger.info("Terms added for Glossary >>>>>> $key")
         }
-
+        logger.info("Glossary $atlasGlossary.name created successfully")
         return "Glossary: " + atlasGlossary.name + " created successfully"
     }
 
