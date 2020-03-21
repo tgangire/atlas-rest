@@ -1,6 +1,7 @@
 package com.demo.atlasrest.client
 
 import com.demo.atlasrest.configuration.FeignClientConfiguration
+import org.apache.atlas.model.discovery.AtlasSearchResult
 import org.apache.atlas.model.glossary.AtlasGlossary
 import org.apache.atlas.model.glossary.AtlasGlossaryCategory
 import org.apache.atlas.model.glossary.AtlasGlossaryTerm
@@ -18,7 +19,7 @@ interface AtlasFeignClient {
     /** Entity Rest Started **/
 
     @PostMapping("/v2/entity")
-    fun createEntity(atlasEntityWithExtInfo: AtlasEntity.AtlasEntityWithExtInfo): Any
+    fun createEntity(atlasEntityWithExtInfo: AtlasEntity.AtlasEntityWithExtInfo): EntityMutationResponse
 
     @PostMapping("/v2/entity/bulk")
     fun createEntities(@RequestBody atlasEntitiesWithExtInfo: AtlasEntity.AtlasEntitiesWithExtInfo): Any
@@ -31,11 +32,15 @@ interface AtlasFeignClient {
 
     @GetMapping("/v2/entity/guid/{guid}")
     fun getEntity(@PathVariable guid: String): AtlasEntity.AtlasEntityWithExtInfo
+
+    @GetMapping("/v2/entity/bulk")
+    fun getEntities(): AtlasEntity.AtlasEntitiesWithExtInfo
+
     /** Entity Rest End **/
 
     /** Glossary Rest Started **/
     @PostMapping("/v2/glossary")
-    fun createGlossaries(@RequestBody atlasGlossary: AtlasGlossary):AtlasGlossary
+    fun createGlossaries(@RequestBody atlasGlossary: AtlasGlossary): AtlasGlossary
 
     @PostMapping("/v2/glossary/categories")
     fun createGlossaryCategory(@RequestBody atlasGlossaryCategoryList: List<AtlasGlossaryCategory>): List<AtlasGlossaryCategory>
@@ -114,4 +119,11 @@ interface AtlasFeignClient {
 
     /** TypesRest Rest End **/
 
+    /** Discovery Rest Start **/
+    @GetMapping("/v2/search/attribute")
+    fun getAttribute(@RequestParam attrValuePrefix: String, @RequestParam typeName: String, @RequestParam(defaultValue = "10") limit: Int, @RequestParam(defaultValue = "0") offset: Int): AtlasSearchResult
+
+    @GetMapping("/v2/search/basic")
+    fun getAttributesSearchBasic(@RequestParam query: String, @RequestParam typeName: String): AtlasSearchResult
+    /** Discovery Rest End **/
 }

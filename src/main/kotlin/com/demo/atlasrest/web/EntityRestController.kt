@@ -42,6 +42,11 @@ class EntityRestController : IBaseController{
         return entityRestService.getEntity(guid)
     }
 
+    @GetMapping("/entities", produces = [MediaType.APPLICATION_JSON_VALUE + ";charset=UTF-8"])
+    fun getEntities(): AtlasEntity.AtlasEntitiesWithExtInfo {
+        return entityRestService.getEntities()
+    }
+
     @PostMapping("/entity/upload")
     fun uploadEntity(@RequestParam("file") file: MultipartFile): String {
         return entityRestService.uploadEntity(file)

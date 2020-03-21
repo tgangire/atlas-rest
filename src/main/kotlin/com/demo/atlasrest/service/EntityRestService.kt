@@ -1,13 +1,13 @@
 package com.demo.atlasrest.service
 
 import com.demo.atlasrest.client.AtlasFeignClient
-import org.apache.atlas.model.instance.AtlasEntity
-import org.apache.atlas.model.instance.AtlasEntityHeaders
-import org.apache.atlas.model.instance.ClassificationAssociateRequest
+import org.apache.atlas.model.instance.*
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
+import java.util.*
+import kotlin.collections.ArrayList
 import kotlin.random.Random
 
 @Service
@@ -16,7 +16,10 @@ class EntityRestService {
     @Autowired
     lateinit var atlasFeignClient: AtlasFeignClient
 
-    fun createEntity(atlasEntityWithExtInfo: AtlasEntity.AtlasEntityWithExtInfo): Any {
+    @Autowired
+    lateinit var glossaryService: GlossaryService
+
+    fun createEntity(atlasEntityWithExtInfo: AtlasEntity.AtlasEntityWithExtInfo): EntityMutationResponse {
         return atlasFeignClient.createEntity(atlasEntityWithExtInfo)
     }
 
@@ -104,6 +107,10 @@ class EntityRestService {
 
 
         var columns = ArrayList<Map<String, String>>()
+        var assignedEntities = mutableMapOf<String, String>()
+        var glossaries = glossaryService.getGlossaries()
+        val glossaryTermsByName = glossaries.associateBy({ it.name }, { it.terms })
+
         while (rows.hasNext()) {
 
             val currentRow = rows.next()
@@ -126,27 +133,56 @@ class EntityRestService {
             referencedAttributes1.put("description", currentRow.getCell(1).stringCellValue)
             referencedAttributes1.put("qualifiedName", "default." + tableName + "." + currentRow.getCell(0).stringCellValue + "@hdp_cluster")
             referencedAttributes1.put("type", currentRow.getCell(3).stringCellValue)
+
+
             val ra1 = createMap("hive_table").toMutableMap()
             ra1["guid"] = atlasEntity.guid
             referencedAttributes1.put("table", ra1)
             referencedAtlasEntity1.attributes = referencedAttributes1
 
+            //assign term to columns
+
+
+            if (!Objects.isNull(currentRow.getCell(7))) {
+                var term = currentRow.getCell(7).stringCellValue.trim().replace(".", " ")
+                var glossaryName = currentRow.getCell(6).stringCellValue.trim().replace(".", " ")
+
+                var termGuid = glossaryTermsByName[glossaryName]?.stream()?.filter { terms -> terms.displayText.equals(term) }?.findFirst()
+
+                if (termGuid != null) {
+                    if (termGuid.isPresent) {
+                        assignedEntities.put(referencedAtlasEntity1.guid, termGuid.get().termGuid)
+                    }
+                }
+            }
             referredEntities.put(columnMap.get("guid").toString(), referencedAtlasEntity1)
 
 
         }
 
-        attributes.put("columns", columns)
+        attributes["columns"] = columns
 
         workbook.close()
         atlasEntity.attributes = attributes
         atlasEntityWithExtInfo.referredEntities = referredEntities
         atlasEntityWithExtInfo.entity = atlasEntity
-        createEntity(atlasEntityWithExtInfo)
 
+        val entityMutationResponse = createEntity(atlasEntityWithExtInfo)
+
+        val guidAssignments = entityMutationResponse.guidAssignments
+
+        assignedEntities.forEach { (key, value) ->
+
+            val atlasRelatedObjectIds = mutableListOf<AtlasRelatedObjectId>()
+            val atlasRelatedObjectId = AtlasRelatedObjectId()
+            atlasRelatedObjectId.guid = guidAssignments.get(key)
+            atlasRelatedObjectIds.add(atlasRelatedObjectId)
+
+            glossaryService.createGlossaryTermAssignedEntities(value, atlasRelatedObjectIds)
+        }
         println("table $tableName created")
 
-        return tableName + " Created Successfully"
+        return "$tableName Created Successfully"
     }
 
     fun createMap(typeName: String): Map<String, String> {
@@ -157,6 +193,10 @@ class EntityRestService {
 
         return map
 
+    }
+
+    fun getEntities(): AtlasEntity.AtlasEntitiesWithExtInfo {
+        return atlasFeignClient.getEntities()
     }
 }
 
