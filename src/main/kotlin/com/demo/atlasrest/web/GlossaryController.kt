@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
+import javax.servlet.http.HttpServletResponse
 
 @RestController
 @Tag(name="GlossaryREST", description = "REST for Glossary.")
@@ -38,23 +39,29 @@ class GlossaryController :IBaseController {
         return glossaryService.createGlossaryTerms(atlasGlossaryTermList)
     }
 
-    @PostMapping("/glossary/terms/{termGuid}/assignedEntities",consumes = [MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"],produces = [MediaType.TEXT_PLAIN_VALUE+";charset=UTF-8"])
-    fun createGlossaryTermAssignedEntities(@PathVariable termGuid:String,@RequestBody atlasRelatedObjectIdList:List<AtlasRelatedObjectId>) : Any{
-        return glossaryService.createGlossaryTermAssignedEntities(termGuid,atlasRelatedObjectIdList)
+    @PostMapping("/glossary/terms/{termGuid}/assignedEntities", consumes = [MediaType.APPLICATION_JSON_VALUE + ";charset=UTF-8"], produces = [MediaType.TEXT_PLAIN_VALUE + ";charset=UTF-8"])
+    fun createGlossaryTermAssignedEntities(@PathVariable termGuid: String, @RequestBody atlasRelatedObjectIdList: List<AtlasRelatedObjectId>): Any {
+        return glossaryService.createGlossaryTermAssignedEntities(termGuid, atlasRelatedObjectIdList)
     }
 
-    @GetMapping("/glossary",produces = [MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"])
-    fun getGlossaries() : List<AtlasGlossary>{
+    @GetMapping("/glossary", produces = [MediaType.APPLICATION_JSON_VALUE + ";charset=UTF-8"])
+    fun getGlossaries(): List<AtlasGlossary> {
         return glossaryService.getGlossaries()
     }
 
-    @GetMapping("/glossary/category/{categoryGuid}",produces = [MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"])
-    fun getGlossaryCategory(@PathVariable categoryGuid:String) : AtlasGlossaryCategory{
+    @GetMapping("/download/glossary", produces = [MediaType.APPLICATION_STREAM_JSON_VALUE + ";charset=UTF-8"])
+    @ResponseBody
+    fun downloadGlossaries(response: HttpServletResponse) {
+        glossaryService.downloadGlossaries(response)
+    }
+
+    @GetMapping("/glossary/category/{categoryGuid}", produces = [MediaType.APPLICATION_JSON_VALUE + ";charset=UTF-8"])
+    fun getGlossaryCategory(@PathVariable categoryGuid: String): AtlasGlossaryCategory {
         return glossaryService.getGlossaryCategory(categoryGuid)
     }
 
-    @GetMapping("/glossary/term/{termGuid}",produces = [MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"])
-    fun getGlossaryTerm(@PathVariable termGuid:String) : AtlasGlossaryTerm{
+    @GetMapping("/glossary/term/{termGuid}", produces = [MediaType.APPLICATION_JSON_VALUE + ";charset=UTF-8"])
+    fun getGlossaryTerm(@PathVariable termGuid: String): AtlasGlossaryTerm {
         return glossaryService.getGlossaryTerm(termGuid)
     }
 

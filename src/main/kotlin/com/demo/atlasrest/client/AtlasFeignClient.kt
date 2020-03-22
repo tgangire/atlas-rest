@@ -103,7 +103,7 @@ interface AtlasFeignClient {
     fun getTypesTypeDefByGuid(@PathVariable guid: String): AtlasBaseTypeDef
 
     @GetMapping("/v2/types/typedef/name/{name}")
-    fun getTypesTypeDefByName(@PathVariable name: String): AtlasBaseTypeDef
+    fun getTypesTypeDefByName(@PathVariable name: String): Any
 
     @GetMapping("/v2/types/typedefs")
     fun getTypesTypeDefs(): AtlasTypesDef

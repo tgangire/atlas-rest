@@ -39,7 +39,7 @@ class TypesRestService {
         return atlasFeignClient.getTypesTypeDefByGuid(guid)
     }
 
-    fun getTypesTypeDefByName(name: String): AtlasBaseTypeDef {
+    fun getTypesTypeDefByName(name: String): Any {
         return atlasFeignClient.getTypesTypeDefByName(name)
     }
 

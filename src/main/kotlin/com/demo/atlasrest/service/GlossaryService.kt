@@ -6,16 +6,25 @@ import org.apache.atlas.model.glossary.AtlasGlossary
 import org.apache.atlas.model.glossary.AtlasGlossaryCategory
 import org.apache.atlas.model.glossary.AtlasGlossaryTerm
 import org.apache.atlas.model.glossary.relations.AtlasGlossaryHeader
+import org.apache.atlas.model.glossary.relations.AtlasRelatedCategoryHeader
+import org.apache.atlas.model.glossary.relations.AtlasRelatedTermHeader
 import org.apache.atlas.model.glossary.relations.AtlasTermCategorizationHeader
 import org.apache.atlas.model.instance.AtlasClassification
 import org.apache.atlas.model.instance.AtlasRelatedObjectId
+import org.apache.commons.collections4.CollectionUtils
+import org.apache.commons.io.IOUtils
 import org.apache.commons.lang3.StringUtils
+import org.apache.poi.xssf.usermodel.XSSFRow
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
 import java.util.*
+import javax.servlet.http.HttpServletResponse
+
 
 @Service
 class GlossaryService {
@@ -197,6 +206,131 @@ class GlossaryService {
         }
         logger.info("Glossary $atlasGlossary.name created successfully")
         return "Glossary: " + atlasGlossary.name + " created successfully"
+    }
+
+    fun downloadGlossaries(response: HttpServletResponse) {
+
+        response.contentType = "application/octet-stream"
+        response.setHeader("Content-Disposition", "attachment; filename=Glossary.xlsx")
+
+        val workbook = XSSFWorkbook()
+        val sheet = workbook.createSheet("Glossary")
+        val termsBook = workbook.createSheet("Terms")
+        val categoriesBook = workbook.createSheet("Category")
+        val classificationBook = workbook.createSheet("Classification")
+
+        val glossaries = getGlossaries()
+
+        var termIndex = 0
+        var categoryIndex = 0
+        var classificationIndex = 0
+
+
+        var x = ByteArrayOutputStream()
+        glossaries.forEachIndexed { index, glossary ->
+
+            var colNum = 0
+            if (index == 0) {
+
+                val row = sheet.createRow(index)
+                createCell(row, "Name", 0)
+                createCell(row, "QualifiedName", 1)
+                createCell(row, "ShortDescription", 2)
+                createCell(row, "LongDescription", 3)
+                createCell(row, "Language", 4)
+                createCell(row, "Guid", 5)
+
+                val termRow = termsBook.createRow(termIndex++)
+                createCell(termRow, "Glossary", 0)
+                createCell(termRow, "Term", 1)
+                createCell(termRow, "Classification", 2)
+
+                val categoryRow = categoriesBook.createRow(categoryIndex++)
+                createCell(categoryRow, "Glossary", 0)
+                createCell(categoryRow, "Category", 1)
+
+                val classificationRow = classificationBook.createRow(classificationIndex++)
+                createCell(classificationRow, "Glossary", 0)
+                createCell(classificationRow, "Classification", 1)
+            }
+            val row = sheet.createRow(index + 1)
+            createCell(row, glossary.name, 0)
+            createCell(row, glossary.qualifiedName, 1)
+
+            var sd = ""
+            sd = glossary.shortDescription?.toString().toString()
+            createCell(row, sd, 3)
+
+            var ld = ""
+            ld = glossary.longDescription?.toString().toString()
+            createCell(row, ld, 3)
+
+            var lan = ""
+            lan = glossary.language?.toString().toString()
+            createCell(row, lan, 4)
+            createCell(row, glossary.guid, 5)
+
+
+            val terms: Set<AtlasRelatedTermHeader>? = glossary.terms
+            if (terms != null && CollectionUtils.isNotEmpty(terms)) {
+                terms.forEach { term ->
+
+                    val termRow = termsBook.createRow(termIndex++)
+                    createCell(termRow, glossary.name, 0)
+                    createCell(termRow, term.displayText, 1)
+
+                    val glossaryTerm: AtlasGlossaryTerm? = getGlossaryTerm(term.termGuid)
+                    if (glossaryTerm != null) {
+
+                        val classifications: List<AtlasClassification>? = glossaryTerm.classifications
+                        if (classifications != null && CollectionUtils.isNotEmpty(classifications)) {
+
+                            createCell(termRow, classifications.joinToString { atlasClassification -> atlasClassification.typeName }, 2)
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+            val categories: Set<AtlasRelatedCategoryHeader>? = glossary.categories
+            if (categories != null && CollectionUtils.isNotEmpty(categories)) {
+                categories.forEach { category ->
+                    val categoryRow = categoriesBook.createRow(categoryIndex++)
+                    createCell(categoryRow, glossary.name, 0)
+                    createCell(categoryRow, category.displayText, 1)
+
+                }
+            }
+
+            val classifications: List<AtlasClassification>? = glossary.classifications
+            if (classifications != null && CollectionUtils.isNotEmpty(classifications)) {
+
+                classifications.forEach { classfi ->
+                    val classificationRow = classificationBook.createRow(classificationIndex++)
+                    createCell(classificationRow, glossary.name, 0)
+                    createCell(classificationRow, classfi.typeName, 1)
+                }
+
+            }
+
+
+        }
+        workbook.write(x)
+
+        workbook.close()
+
+        IOUtils.copy(ByteArrayInputStream(x.toByteArray()), response.outputStream)
+        logger.info("File successfully downloaded")
+
+
+    }
+
+    private fun createCell(row: XSSFRow, value: String, number: Int) {
+        var cell = row.createCell(number)
+        cell.setCellValue(StringUtils.defaultIfBlank(value, ""))
     }
 
 }

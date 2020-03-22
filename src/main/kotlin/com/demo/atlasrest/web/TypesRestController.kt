@@ -2,8 +2,6 @@ package com.demo.atlasrest.web
 
 import com.demo.atlasrest.service.TypesRestService
 import io.swagger.v3.oas.annotations.tags.Tag
-import org.apache.atlas.model.instance.AtlasEntity
-import org.apache.atlas.model.instance.AtlasRelationship
 import org.apache.atlas.model.typedef.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
@@ -51,8 +49,8 @@ class TypesRestController :IBaseController{
         return typesRestService.getTypesTypeDefByGuid(guid)
     }
 
-    @GetMapping("/types/typedef/name/{name}",produces = [MediaType.APPLICATION_JSON_VALUE+";charset=UTF-8"])
-    fun getTypesTypeDefByName(@PathVariable name:String) : AtlasBaseTypeDef {
+    @GetMapping("/types/typedef/name/{name}", produces = [MediaType.APPLICATION_JSON_VALUE + ";charset=UTF-8"])
+    fun getTypesTypeDefByName(@PathVariable name: String): Any {
         return typesRestService.getTypesTypeDefByName(name)
     }
 
