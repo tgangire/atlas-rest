@@ -71,7 +71,7 @@ class GlossaryService {
         return atlasFeignClient.getGlossaryTermAssignedEntities(termGuid)
     }
 
-    fun uploadGlossaries(file: MultipartFile): String {
+    fun uploadGlossaries(file: MultipartFile, glossaryName: String): String {
 
         val workbook = XSSFWorkbook(file.inputStream)
         val sheet = workbook.getSheetAt(0)
@@ -117,10 +117,16 @@ class GlossaryService {
         val rand = Random()
         val x = rand.nextInt(10000)
         val atlasGlossary = AtlasGlossary()
-        atlasGlossary.qualifiedName = "SampleBank$x"
-        atlasGlossary.name = "Banking$x"
-        atlasGlossary.shortDescription = "Glossary of bank"
-        atlasGlossary.longDescription = "Glossary of bank - long description"
+
+        //uncomment below two lines to create random Glossary
+        /* atlasGlossary.qualifiedName = "SampleBank$x"
+         atlasGlossary.name = "Banking$x"*/
+
+        atlasGlossary.qualifiedName = glossaryName
+        atlasGlossary.name = glossaryName
+
+        atlasGlossary.shortDescription = "deposit glossary"
+        atlasGlossary.longDescription = "Glossary of Deposit"
         atlasGlossary.language = "English"
         atlasGlossary.usage = "N/A"
 

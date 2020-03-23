@@ -48,8 +48,13 @@ class EntityRestController : IBaseController{
     }
 
     @PostMapping("/entity/upload")
-    fun uploadEntity(@RequestParam("file") file: MultipartFile): String {
-        return entityRestService.uploadEntity(file)
+    fun uploadEntity(@RequestParam("file") file: MultipartFile, @RequestParam tableName: String, @RequestParam tableTypeDef: String, @RequestParam columnTypeDef: String): String {
+        return entityRestService.uploadEntity(file, tableName, tableTypeDef, columnTypeDef)
+    }
+
+    @PostMapping("/entity/addendum/upload")
+    fun uploadAddendumEntity(@RequestParam("file") file: MultipartFile, @RequestParam tableName: String, @RequestParam tableTypeDef: String, @RequestParam columnTypeDef: String): String {
+        return entityRestService.uploadAddendumEntity(file, tableName, tableTypeDef, columnTypeDef)
     }
 
 }

@@ -25,8 +25,8 @@ class GlossaryController :IBaseController {
     }
 
     @PostMapping("/glossary/upload")
-    fun uploadGlossaries(@RequestParam("file") file: MultipartFile): String {
-        return glossaryService.uploadGlossaries(file)
+    fun uploadGlossaries(@RequestParam("file") file: MultipartFile, @RequestParam glossaryName: String): String {
+        return glossaryService.uploadGlossaries(file, glossaryName)
     }
 
     @PostMapping("/glossary/categories", consumes = [MediaType.APPLICATION_JSON_VALUE + ";charset=UTF-8"], produces = [MediaType.APPLICATION_JSON_VALUE + ";charset=UTF-8"])
